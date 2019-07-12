@@ -1,5 +1,6 @@
 package com.example.newsone2.domain
 
 // дописать параметры
-class NewsObject(id: Int = 1, url: String = "", imageUrl: String = "", title: String = "", descrip: String = "",
-                 byline: String = "", copyright: String = "", date: String = "", source: String = "", favState: Boolean = false)
+class NewsObject(var id: Int = 1, var url: String = "", var imageUrl: String = "", var title: String = "",
+                 var descrip: String = "", var byline: String = "", var copyright: String = "",
+                 var date: String = "", var source: String = "", var favState: Boolean = false)
