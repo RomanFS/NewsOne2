@@ -15,7 +15,7 @@ class DataHolder(context: Context, name: String?,
         factory, DATABASE_VERSION) {
 
     override fun onCreate(db: SQLiteDatabase) {
-        val tableData = "(_id INTEGER PRIMARY KEY NOT NULL, url TEXT, imageUrl TEXT, " +
+        val tableData = "(_ID INTEGER PRIMARY KEY NOT NULL, url TEXT, imageUrl TEXT, " +
                 "title TEXT, descrip TEXT, byline TEXT, copyright TEXT, date TEXT, source TEXT, favState BIT)"
 
         val CREATE_EMAILED_TABLE = ("CREATE TABLE $TABLE_EMAILED$tableData")
@@ -30,10 +30,7 @@ class DataHolder(context: Context, name: String?,
             db.execSQL(CREATE_FAVOURITE_TABLE)
         } catch (e: Throwable) {
             Log.e(TAG, "DataCreate: ", e)
-        } finally {
-            db.close()
         }
-
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int,
@@ -46,31 +43,52 @@ class DataHolder(context: Context, name: String?,
             onCreate(db)
         } catch (e: Throwable) {
             Log.e(TAG, "DataUpdate: ", e)
-        } finally {
-            db.close()
         }
     }
 
-    fun addNews(news: NewsObject, tableName: String) {
-        val values = ContentValues()
-        values.put(url, news.url)
-        values.put(title, news.title)
-        values.put(descrip, news.descrip)
-        values.put(copyright, news.copyright)
-        values.put(imageUrl, news.imageUrl)
-        values.put(source, news.source)
-        values.put(date, news.date)
-        values.put(byline, news.byline)
-        values.put(favState, news.favState)
-
+    fun addNews(tableName: String, newsList: ArrayList<NewsObject>) {
         val db = this.writableDatabase
-
         try {
-            db.insert(tableName, null, values)
+            for (i in 0 until newsList.size) {
+                val news = newsList[i]
+                val values = ContentValues()
+
+                values.put(url, news.url)
+                values.put(title, news.title)
+                values.put(descrip, news.descrip)
+                values.put(copyright, news.copyright)
+                values.put(imageUrl, news.imageUrl)
+                values.put(source, news.source)
+                values.put(date, news.date)
+                values.put(byline, news.byline)
+                values.put(favState, news.favState)
+
+                db.insert(tableName, null, values)
+            }
         } catch (e: Throwable) {
             Log.e(TAG, "AddNews: ", e)
+        }
+    }
+
+    fun updateNews(tableName: String, newsList: ArrayList<NewsObject>) {
+        val db = this.writableDatabase
+        val query = "SELECT * FROM $tableName"
+        val cursor = db.rawQuery(query, null)
+
+        try {
+            while (cursor.moveToNext()) {
+                val id = Integer.parseInt(cursor.getString(cursor.getColumnIndex("_ID")))
+                db.delete(
+                    tableName, "_ID = ?",
+                    arrayOf(id.toString())
+                )
+            }
+
+            addNews(tableName, newsList)
+        } catch (e: Throwable){
+            Log.e(TAG, "deleteFav: ", e)
         } finally {
-            db.close()
+            cursor.close()
         }
     }
 
@@ -101,7 +119,6 @@ class DataHolder(context: Context, name: String?,
             Log.e(TAG, "AddNews: ", e)
         } finally {
             cursor.close()
-            db.close()
             return newsList
         }
     }
@@ -112,22 +129,18 @@ class DataHolder(context: Context, name: String?,
         try {
             var query = "UPDATE $TABLE_EMAILED SET favState = '1' WHERE url = \"$newsUrl\""
             db.execSQL(query)
-
             query = "UPDATE $TABLE_SHARED SET favState = '1' WHERE url = \"$newsUrl\""
             db.execSQL(query)
-
             query = "UPDATE $TABLE_VIEWED SET favState = '1' WHERE url = \"$newsUrl\""
             db.execSQL(query)
         } catch (e: Throwable){
             Log.e(TAG, "deleteFav: ", e)
-        } finally {
-            db.close()
         }
     }
 
     fun deleteFav(tableName: String, newsUrl: String) {
-        val query = "SELECT * FROM $tableName WHERE url = \"$newsUrl\""
         val db = this.writableDatabase
+        var query = "SELECT $TABLE_FAV WHERE url = \"$newsUrl\""
         val cursor = db.rawQuery(query, null)
 
         try {
@@ -138,17 +151,22 @@ class DataHolder(context: Context, name: String?,
                     arrayOf(id.toString())
                 )
             }
+            query = "UPDATE $TABLE_EMAILED SET favState = '0' WHERE url = \"$newsUrl\""
+            db.execSQL(query)
+            query = "UPDATE $TABLE_SHARED SET favState = '0' WHERE url = \"$newsUrl\""
+            db.execSQL(query)
+            query = "UPDATE $TABLE_VIEWED SET favState = '0' WHERE url = \"$newsUrl\""
+            db.execSQL(query)
         } catch (e: Throwable){
             Log.e(TAG, "deleteFav: ", e)
         } finally {
             cursor.close()
-            db.close()
         }
     }
 
     fun getItemCount(tableName: String): Int {
-        val query = "SELECT * FROM $tableName ORDER BY _ID DESC LIMIT 1"
         val db = this.writableDatabase
+        val query = "SELECT * FROM $tableName ORDER BY _ID DESC LIMIT 1"
         val cursor = db.rawQuery(query, null)
         var count = 0
 
@@ -160,8 +178,6 @@ class DataHolder(context: Context, name: String?,
             Log.e(TAG, "getItemCount: ", e)
         } finally {
             cursor.close()
-            db.close()
-            Log.d(TAG, "getItemCount: $count")
             return count
         }
     }

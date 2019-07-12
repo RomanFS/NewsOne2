@@ -3,7 +3,6 @@ package com.example.newsone2.ui.fragments
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,9 +11,9 @@ import com.example.newsone2.domain.NewsAdapter
 import kotlinx.android.synthetic.main.fragment_emailed.*
 
 private var lastFirstVisiblePosition: Int = 0
+private const val tableName = "emailed"
 
 class EmailedFragment : Fragment() {
-    private val TAG = "EmailedFragment"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -27,7 +26,7 @@ class EmailedFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         recycle.layoutManager = LinearLayoutManager(context)
-        recycle.adapter = NewsAdapter()
+        recycle.adapter = NewsAdapter(context!!, tableName)
     }
 
     override fun onPause() {
