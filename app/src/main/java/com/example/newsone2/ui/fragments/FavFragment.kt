@@ -13,7 +13,7 @@ import kotlinx.android.synthetic.main.fragment_fav.*
 private var lastFirstVisiblePosition: Int = 0
 private const val tableName = "fav"
 
-class FavFragment : Fragment() {
+class FavFragment: Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

@@ -1,23 +1,18 @@
 package com.example.newsone2.ui
 
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.v4.app.Fragment
+import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.MenuItem
 import com.example.newsone2.R
-import com.example.newsone2.ui.fragments.EmailedFragment
-import com.example.newsone2.ui.fragments.FavFragment
-import com.example.newsone2.ui.fragments.SharedFragment
-import com.example.newsone2.ui.fragments.ViewedFragment
+import com.example.newsone2.ui.fragments.*
 import kotlinx.android.synthetic.main.activity_main.*
 
-
+private const val TAG = "MainActivity"
 //OnFragmentInteractionListener чтобы получить доступ к активити с фрагмента
 class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
-    private val TAG = "MainActivity"
-    private val manager = supportFragmentManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,8 +49,8 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
         return false
     }
 
-    private fun replace(fragment: Fragment) {
-        val transaction = manager.beginTransaction()
+    fun replace(fragment: Fragment) {
+        val transaction = supportFragmentManager.beginTransaction()
         transaction.replace(R.id.container, fragment, null)
         transaction.commit()
     }
